@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.example.demo.vo.TwitterVO;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -28,13 +29,13 @@ public class EsRepository {
 	@Autowired
 	private Client client;
 
-    public Map<String, Object> getResponse(String index, String type, String id) {
+    public Map<String, Object> get(TwitterVO vo) {
     	
-    	return client.prepareGet(index, type, id).get().getSource();
+    	return client.prepareGet(vo.getIndex(),vo.getType(),vo.getId()).get().getSource();
     }
     
-    public IndexResponse indexResponse(String index, String type, String id) throws IOException  {
-    	return client.prepareIndex(index, type, id)
+    public IndexResponse index(TwitterVO vo) throws IOException  {
+    	return client.prepareIndex(vo.getIndex(),vo.getType(),vo.getId())
         .setSource(jsonBuilder()
                     .startObject()
                         .field("user", "kimchy")
@@ -46,26 +47,27 @@ public class EsRepository {
     
     }
     
-    public DeleteResponse deleteResponse(String index, String type, String id)  {
-    	return client.prepareDelete(index, type, id).get();
+    public DeleteResponse delete(TwitterVO vo)  {
+    	return client.prepareDelete(vo.getIndex(), vo.getType(), vo.getId()).get();
     }
     
-    public UpdateResponse update() throws IOException, InterruptedException, ExecutionException {
+    public UpdateResponse update(TwitterVO vo) throws IOException, InterruptedException, ExecutionException {
     	UpdateRequest updateRequest = new UpdateRequest();
-    	updateRequest.index("twitter");
-    	updateRequest.type("view");
-    	updateRequest.id("3");
+    	updateRequest.index(vo.getIndex());
+    	updateRequest.type(vo.getType());
+    	updateRequest.id(vo.getId());
     	updateRequest.doc(jsonBuilder()
     	        .startObject()
-    	            .field("name", "test2")
+                    .field("postDate", new Date())
+    	            .field("Message", vo.getMessage())
     	        .endObject());
     	return client.update(updateRequest).get();
     }
     
-    public HashMap<String, Object> findSongWithPrefix(String prefix) {
+    public HashMap<String, Object> findPrefixTwitter(TwitterVO twitterVO, String prefix) {
 
-        SearchResponse response = client.prepareSearch("twitter")
-                .setTypes("view")
+        SearchResponse response = client.prepareSearch(twitterVO.getIndex())
+                .setTypes(twitterVO.getType())
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(QueryBuilders.prefixQuery("user",prefix))
                 .setFrom(0).setSize(20).setExplain(true)

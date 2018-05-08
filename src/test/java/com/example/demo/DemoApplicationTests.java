@@ -1,12 +1,11 @@
 package com.example.demo;
 
-
-
-
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
+import com.example.demo.vo.TwitterVO;
 import org.elasticsearch.search.SearchHit;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -27,35 +26,47 @@ public class DemoApplicationTests {
 	EsRepository esRepository;
 
 	@Test
-	public void test01_getResponse() {
-		System.out.println( esRepository.getResponse("twitter","view","1"));
-		System.out.println( esRepository.getResponse("twitter","view","2"));
-		System.out.println( esRepository.getResponse("twitter","view","3"));
+	public void test01_get() {
+		TwitterVO vo = new TwitterVO();
+		vo.setId("1");
+		System.out.println( esRepository.get(vo));
+		vo.setId("1");
+		System.out.println( esRepository.get(vo));
+		vo.setId("1");
+		System.out.println( esRepository.get(vo));
 	}
 	
 	@Test
-	public void test03_deleteResponse() {
-		System.out.println(esRepository.deleteResponse("twitter", "view", "1"));
+	public void test03_delete() {
+		TwitterVO vo = new TwitterVO();
+		vo.setId("6");
+		System.out.println(esRepository.delete(vo));
 	}
+
 	@Test
-	public void test02_indexResponse() throws IOException {
-		System.out.println(esRepository.indexResponse("twitter", "view", "1"));
+	public void test02_index() throws IOException {
+		TwitterVO twitterVO =  new TwitterVO();
+		twitterVO.setId("6");
+		System.out.println(esRepository.index(twitterVO));
 
 	}
 	@Test
 	public void test04_update() throws IOException, InterruptedException, ExecutionException {
-		System.out.println( esRepository.update());
+		TwitterVO twitterVO =  new TwitterVO();
+		twitterVO.setId("3");
+		twitterVO.setUser("kwak");
+		twitterVO.setPostDate(new Date());
+		twitterVO.setMessage("test");
+		System.out.println( esRepository.update(twitterVO));
 	}
 	@Test
 	public void test05() {
-		HashMap<String, Object> result = esRepository.findSongWithPrefix("ki");
-
+		TwitterVO twitterVO = new TwitterVO();
+		HashMap<String, Object> result = esRepository.findPrefixTwitter(twitterVO,"ki");
 
 		SearchHit [] hits = (SearchHit [])result.get("contentsList");
 		System.out.println("Total : " + result.get("total"));
 		System.out.println("user : " + hits[0].getSource().get("user"));
 	}
-
-	
 	
 }
